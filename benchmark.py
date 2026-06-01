@@ -11,6 +11,8 @@ between versions rather than just retrieve. the two relevant sections of the
 canonical spec are maximally separated, requiring true long-range synthesis
 under noise.
 
+paper reference: https://openreview.net/pdf?id=Gi4dBsSnbv
+
 stress variable: distractor density (# of conflicting spec versions injected)
 not raw token count.
 
