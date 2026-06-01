@@ -41,8 +41,8 @@ reference to paper: https://openreview.net/pdf?id=Gi4dBsSnbv
 **findings:**
 
 - **model tier matters more than distractor count.** gpt-4o is robust across all distractor levels (0.87–0.93). gpt-4o-mini degrades and plateaus well below it regardless of distractor count.
-- **gpt-4o-mini's baseline is already low (0.58)** — it struggles with multi-hop cross-section reasoning before any adversarial noise is introduced. the task itself is the bottleneck, not just the distractors.
-- **the 1-distractor bump on gpt-4o-mini (0.58 → 0.73) is real.** one conflicting version appears to make the model more deliberate about identifying the canonical spec. adding more distractors reverses this — it starts blending and plateaus around 0.68–0.69.
+- **gpt-4o-mini's baseline is already low (0.58).** it struggles with multi-hop cross-section reasoning before any adversarial noise is introduced. the task itself is the bottleneck, not just the distractors.
+- **the 1-distractor bump on gpt-4o-mini (0.58 → 0.73) is real.** one conflicting version appears to make the model more deliberate about identifying the canonical spec. adding more distractors reverses this, it starts blending and plateaus around 0.68–0.69.
 - **for production RAG systems under version conflict, gpt-4o-mini is not a safe cost-saving swap for gpt-4o** on tasks requiring multi-hop synthesis.
 
 ## trace structure (Respan)
