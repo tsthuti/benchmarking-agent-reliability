@@ -10,7 +10,7 @@ built with **Respan** for full agent trace observability.
 ## motivation
 
 context length alone doesn't break modern 128k-context models. what does break
-them is **adversarial retrieval**; when the retrieved context contains plausible
+them is **adversarial retrieval**: when the retrieved context contains plausible
 but wrong information that conflicts with the correct source. this is a real
 production failure mode: RAG systems routinely pull back multiple versions of
 the same doc, stale cache entries, or contradictory tool outputs.
@@ -18,12 +18,10 @@ the same doc, stale cache entries, or contradictory tool outputs.
 this benchmark quantifies that failure mode and measures how different models
 hold up under it.
 
-reference to paper: https://openreview.net/pdf?id=Gi4dBsSnbv
-
 ## what it does
 
 1. a RAG agent answers multi-hop questions over a fake internal engineering spec (Orion Inference Platform v2.3)
-2. every question requires connecting two sections of the canonical spec — no answer is a single extractable sentence
+2. every question requires connecting two sections of the canonical spec, no answer is a single extractable sentence
 3. the canonical spec is **split in half and maximally separated** in context, with distractors buried between them
 4. **distractor density** is the stress variable: 0 → 1 → 2 → 3 conflicting old spec versions (v2.1, v2.2, v2.3-draft) are injected, each with subtly wrong numbers that look authoritative
 5. an LLM-as-judge (gpt-4o-mini) scores each answer on faithfulness to v2.3 + conciseness, penalizing distractor blending explicitly
@@ -56,7 +54,26 @@ rag_agent_run  [workflow]
 └── evaluate_answer    [task]  — LLM-as-judge call, auto-traced
 ```
 
-all traces visible at `platform.respan.ai`.
+all 32 traces visible at `platform.respan.ai`. LLM calls are routed through
+Respan's gateway, so cost, latency, and token usage per model appear natively
+in the dashboard alongside the trace tree.
+
+## respan eval workflow
+
+respan's eval system is UI-first => evaluators are built as visual workflows in
+the dashboard and aren't callable inline from Python. the intended pattern is:
+
+1. **run the benchmark** - all 32 agent traces land in Respan automatically
+2. **sample spans into a dataset** - go to platform.respan.ai → Datasets →
+   create from production spans. filter by `span_workflow_name=rag_agent_run`
+   to pull exactly the benchmark runs
+3. **build an evaluator** - Evaluators page → new LLM grader → paste the
+   faithfulness definition from `evaluate_answer` in benchmark.py, using
+   `{{input}}`, `{{output}}`, `{{expected_output}}` variables
+4. **run an experiment** - select your dataset + evaluator, run across both
+   models, compare scores in the Analytics tab
+
+the benchmark script handles step 1 fully automatically; steps 2–4 take ~10 minutes in the UI.
 
 ## setup
 
@@ -67,8 +84,12 @@ pip install respan-ai openai tabulate matplotlib python-dotenv
 add to `.env`:
 ```
 RESPAN_API_KEY=your_respan_api_key
-OPENAI_API_KEY=your_openai_api_key
 ```
+
+add your OpenAI key to Respan's gateway:
+`platform.respan.ai → Integrations → LLM Providers → OpenAI`
+
+all LLM calls route through Respan — no `OPENAI_API_KEY` needed in your env.
 
 ## run
 
@@ -78,9 +99,8 @@ python benchmark.py
 
 outputs a summary table to console + `degradation_curve.png`.
 
-## extending this (future commits)
-
+## extending this (future)
 - add Claude / Gemini via their respective clients (Respan auto-instruments both)
 - increase distractor count beyond 3 to find each model's breaking point
-- export the Respan dataset and run offline evals to compare prompt variants
+- use Respan's online evals to score production traffic automatically as distractor patterns change
 - add a retrieval quality score to isolate whether degradation is a retrieval failure or a reasoning failure

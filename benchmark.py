@@ -11,8 +11,6 @@ between versions rather than just retrieve. the two relevant sections of the
 canonical spec are maximally separated, requiring true long-range synthesis
 under noise.
 
-paper reference: https://openreview.net/pdf?id=Gi4dBsSnbv
-
 stress variable: distractor density (# of conflicting spec versions injected)
 not raw token count.
 
@@ -44,8 +42,12 @@ load_dotenv()
 # init respan - auto-instr openai
 Respan()
 
-# load client
-openai_client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+# load client — routed through respan gateway
+# => cost, latency, token usage appear natively in respan dashboard
+openai_client = OpenAI(
+    api_key=os.environ["RESPAN_API_KEY"],
+    base_url="https://api.respan.ai/api/",
+)
 MODELS = ["gpt-4o", "gpt-4o-mini"]
 
 # stress variable: how many conflicting spec versions are injected
