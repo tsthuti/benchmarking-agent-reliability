@@ -1,6 +1,6 @@
 # agent reliability benchmark
 
-stress-tests a RAG agent under adversarial retrieval conditions — specifically,
+stress-tests a RAG agent under adversarial retrieval conditions: specifically,
 what happens when a production agent receives multiple conflicting versions of
 the same document and must identify the canonical one while answering multi-hop
 questions.
